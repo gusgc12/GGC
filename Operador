@@ -1,0 +1,53 @@
+private String opera(char s, double d1, double d2){
+        String res = "";
+        DecimalFormat n = new DecimalFormat("0.0000000");
+        switch(s){
+            case '*':
+                res = n.format(d1 * d2);
+                break;
+            case '/':
+                res = n.format(d1 / d2);
+                break;
+            case '+':
+                res = n.format(d1 + d2);
+                break;
+            case '_':
+                res = n.format(d1 - d2);
+                break;
+        }
+        return res;
+    }
+    
+    
+public String evaluaOperación(String postfija){
+        Stack <String> pila = new Stack();
+        int i;
+        char aux;
+        StringBuilder auxiliar = new StringBuilder();
+        double p, p1;
+        
+        for(i = 0; i<postfija.length(); i++){
+            aux = postfija.charAt(i);
+            if(numero(aux)){
+                auxiliar.append(aux);
+            }
+            else {
+                if(auxiliar.length() != 0){
+                    pila.push(auxiliar.toString());
+                    auxiliar = new StringBuilder();
+                }
+                if(ope(aux)){
+                    try {
+                        p = Double.parseDouble(pila.pop());
+                        p1 = Double.parseDouble(pila.pop());
+                        pila.push(opera(aux, p1, p));
+                    } catch (Exception e){
+                        pila.push("Error.");
+                    }
+                }
+            }
+        }
+        
+        return pila.pop();
+        
+    }

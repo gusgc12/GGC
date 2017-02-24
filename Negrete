@@ -1,0 +1,241 @@
+package calculadora;
+
+import java.text.DecimalFormat;
+import pilas.EmptyCollectionException;
+import pilas.PilaA;
+
+/**
+ * Contiene distintos métodos y funciones para, dada una cadena a través del
+ * constructor, considerar esta cadena como expresión algebraica, convirtiéndola 
+ * de infija a postfija y evaluándola posteriormente.
+ * @author Juan Pablo Negrete, Priscila Sánchez, Diego Villalvazo, Sebastián Aranda
+ * @version 1.0
+ * 
+ */
+public class Calculadora {
+    private String expresión;
+    
+    /**
+     * 
+     * Constructor que toma como parámetro una expresión algebraica de tipo String.
+     * Guarda esta cadena en el atributo privado "expresión".
+     * @param s
+     * Una expresión algebraica de tipo String.
+     */
+    public Calculadora(String s){
+        expresión = s;
+    }
+    
+    
+    /**
+     * 
+     * Método que se asegura que el número de paréntesis en la expresión este balanceado.
+     * @return
+     * Si los paréntesis están balanceados, o no.
+     */
+    public boolean revisaParéntesis(){
+        boolean res = false;
+        int n = expresión.length();
+        if(n > 0){
+            char c;
+            int i = 0;
+            PilaA <Character> p = new PilaA();
+            while(i < n){
+                c = expresión.charAt(i);
+                if(c == '(')
+                    p.push(c);
+                else
+                    if(c == ')')
+                     try {
+                            p.pop();
+                        } catch (EmptyCollectionException e) {
+                            i = n;
+                        }
+                i++;
+            }
+            res = i == n && p.isEmpty();
+        }
+        return res;
+    }
+    
+    /**
+     * Método de la clase que se encarga de convertir la expresión de infija a postfija.
+     * @return
+     * La expresión convertida a postfija.
+     */
+    public String convierteAPostfija(){
+        PilaA<Character> pila = new PilaA();
+        int i = 0;
+        char d, aux;
+        boolean espacio = true;
+        StringBuilder cadena = new StringBuilder();
+        
+        while(i<expresión.length()){
+            d = expresión.charAt(i); 
+            if(esDato(d)) {
+                cadena.append(d);
+                espacio = true;
+            }
+            else {
+                if(espacio) {
+                    cadena.append(" ");
+                    espacio = false;
+                }
+                if(d == '(')
+                    pila.push(d);
+                else
+                    if(esOperador(d)){
+                        while(!pila.isEmpty() && jerarquía(d) <= jerarquía(pila.peek())){
+                            cadena.append(pila.pop());
+                            cadena.append(" ");
+   }
+                        pila.push(d);
+                    }
+                    else
+                        if(d == ')'){
+                            while(!pila.isEmpty() && pila.peek() != '('){
+                                cadena.append(pila.pop());
+                                cadena.append(" ");
+                            }
+                            pila.pop();
+                        }
+            }
+            i++;
+        }
+        
+        while(!pila.isEmpty()){
+            aux = pila.pop();
+            if(aux != '(') {
+                cadena.append(aux);
+                cadena.append(" ");
+            }
+        }
+        
+        return cadena.toString();
+    } 
+    
+    /**
+     * Método que toma como parámetro la expresión ya convertida a postfija, para 
+     * evaluarla y regresar el resultado. Detecta errores a través de un try-catch.
+     * @param postfija
+     * La expresión a evaluar, ya en postfija.
+     * @return 
+     * El resultado de la operación.
+     */
+    public String evaluaOperación(String postfija){
+        PilaA <String> pila = new PilaA();
+        int i;
+        char aux;
+        StringBuilder auxiliar = new StringBuilder();
+        double p, p1;
+        
+        for(i = 0; i<postfija.length(); i++){aux = postfija.charAt(i);
+            if(esDato(aux)){
+                auxiliar.append(aux);
+            }
+            else {
+                if(auxiliar.length() != 0){
+                    pila.push(auxiliar.toString());
+                    auxiliar = new StringBuilder();
+                }
+                if(esOperador(aux)){
+                    try {
+                        p = Double.parseDouble(pila.pop());
+                        p1 = Double.parseDouble(pila.pop());
+                        pila.push(opera(aux, p1, p));
+                    } catch (Exception e){
+                        pila.push("Error.");
+                    }
+                }
+            }
+        }
+        
+        return pila.pop();
+        
+    }
+    
+    /**
+     * Método que, dado un caracter, evalua si es un número o punto.
+     * @param d
+     * Un caracter.
+     * @return 
+     * Si el caracter es un número/punto, o no.
+     */
+    private boolean esDato(char d){
+        boolean res = false;
+        if(d == '0' || d == '1' || d == '2' || d == '3' || d == '4' || d == '5' ||
+                d == '6' || d == '7' || d == '8' || d == '9' || d == '.' || d == '-')
+            res = true;
+        return res;
+    }
+    
+    /**
+     * Método que, dado un caracter, evalua si es un operador.
+     * @param d
+     * Un caracter.
+     * @return 
+       * Si el caracter es un operador, o no.
+     */
+    private boolean esOperador(char d){
+        boolean res = false;
+        if(d == '+' || d == '_' || d == '*' || d == '/')
+                res = true;
+        return res;
+    }
+    
+    /**
+     * Método que toma como parámetro un operador, tipo char, y dos números. 
+     * Posteriormente obtiene el resultado de evaluar los dos números con el
+     * operador.
+     * Ejemplo (s = -, d1 = 23, d2 = 21): 23 - 21, a regresar 2.
+     * @param s
+     * Un operador tipo char.
+     * @param d1
+     * Primer número tipo double.
+     * @param d2
+     * Segundo número tipo double.
+     * @return 
+     * Resultado en String.
+     */
+    private String opera(char s, double d1, double d2){
+        String res = "";
+        DecimalFormat n = new DecimalFormat("0.0000000");
+        switch(s){
+            case '*':
+                res = n.format(d1 * d2);
+                break;
+            case '/':
+                res = n.format(d1 / d2);
+                break;
+            case '+':
+                res = n.format(d1 + d2);
+                break;
+            case '_':
+                res = n.format(d1 - d2);
+                break;
+        }
+        return res;
+    }
+       /**
+     * Método que, dado un operador, evalua su jerarquía como operador aritmético.
+     * @param d
+     * Un operador tipo char.
+     * @return 
+     * La jerarquía como operador aritmético del 1-5.
+     */
+    private int jerarquía(char d){
+        int res = 0;
+        switch (d) {
+        case ')':
+            res = 4; break;
+        case '*': case '/':
+            res = 3; break;
+        case '+': case '_':
+            res = 2; break;
+        case '(':
+            res = 1; break;
+        }
+        return res;
+    }
+    
+}

@@ -1,0 +1,444 @@
+package calculadora;
+
+import java.text.DecimalFormat;
+import java.util.Stack;
+
+/**
+ *
+ * @author gonzalo
+ */
+public class Calculador {
+
+    private String numero;
+
+    public Calculador(String numero) {
+        this.numero = numero;
+    }
+
+    public boolean revisarParentesis() {
+        boolean res = false;
+        int n;
+        n = numero.length();
+        if (n > 0) {
+            char c;
+            int i = 0;
+            FilaA<Character> p = new FilaA();
+
+            while (i < n) {
+                c = numero.charAt(i);
+
+                if (c == '(') {
+                    p.push(c);
+                } else if (c == ')') {
+                    if (p.isEmpty()) {
+                        i = n + 1;
+                    } else {
+                        try {
+                            p.pop();
+                        } catch (ExcepcionColeccionVacia e) {
+                            i = n;
+                        }
+                    }
+                }
+
+                i++;
+            }
+            res = i == n && p.isEmpty();
+
+        }
+
+        return res;
+    }
+
+    public int jerarquia(char ope) {
+        char res = 0;
+        switch (ope) {
+            case(')'):
+                res=3;
+                break;
+            case ('+'):
+                res = 1;
+                break;
+            case ('-'):
+                res = 1;
+                break;
+           
+            case ('*'):
+                res = 2;
+                break;
+            case ('/'):    
+                res = 2;
+                break;
+            case('('):
+                res=0;
+                break;
+        }
+        return res;
+    }
+
+    public boolean ope(char ope) {
+
+        return ope == '+' || ope == '-' || ope == '*' || ope == '/';
+    }
+
+    public boolean parDer(char par1) {
+        return par1 == '(';
+    }
+
+    public boolean parIzq(char par1) {
+        return par1 == ')';
+    }
+
+    public boolean numero(char num) {
+
+        return num == '0' || num == '1' || num == '2' || num == '3' || num == '4' || num == '5' || num == '6' || num == '7' || num == '8' || num == '9' || num == '.';
+    }
+
+    /**public String postfija() {
+        StringBuilder cad = new StringBuilder();
+
+        if (revisarParentesis()) {
+            System.out.println("entre");
+            int n;
+            n = numero.length();
+            int i = 0;
+
+            Stack<Character> pila = new Stack();
+
+            while (i < n) {
+
+                char c, f = 'i';
+
+                c = numero.charAt(i);
+
+                if (parDer(c)) {
+                    pila.push(c);
+
+                }
+                if (numero(c)) {
+                    if((i+1)==n){
+                            cad.append(c);
+                    }
+                    else{
+                        f= numero.charAt(i + 1);
+                        if(ope(f)){
+                            cad.append(c);
+                            cad.append(' ');
+                        }
+                        else
+                            cad.append(c);
+                    }
+                }
+                
+                if (parIzq(c)) {
+                    if (ope(pila.peek())) {
+                        cad.append(pila.pop());
+                        pila.pop();
+                    }
+                }
+                if (ope(c)) {
+
+                    if (!pila.isEmpty()) {
+
+                        if (ope(pila.peek())) {
+
+                            cad.append(pila.pop());
+                            pila.push(c);
+                        } else {
+                            f = numero.charAt(i + 1);
+                            if (numero(f)) {
+                                pila.push(c);
+                            } else {
+                                cad.append(c);
+                            }
+                        }
+                    } else {
+                        f = numero.charAt(i + 1);
+                        if (numero(f)) {
+                            pila.push(c);
+                        }
+                    }
+
+                }
+
+                i++;
+
+            }
+
+            while (!pila.isEmpty()) {
+                cad.append(pila.pop());
+            }
+
+        }
+        return cad.toString();
+    }
+
+   /** public double calcular(String met){
+        StringBuilder cad = new StringBuilder();
+        double res=0;
+        int n;
+        n= met.length();
+        int i=0; 
+        char c,f,d;
+        Stack<Character> oper = new Stack();
+            
+        
+        while( i<n){
+            c=met.charAt(i);
+            if(numero(c)){
+                if((i+1)<n){
+                    f = numero.charAt(i + 1);
+                    if(f==','){
+                        cad.append(c);
+                        int t=i+2;
+                        char u;
+                        u= numero.charAt(t);
+                        while(t<n && !ope(u)){                       
+                            t++;
+                            u= numero.charAt(t);
+                        }
+                        if(ope(u))
+                            cad.append(u);
+                    }
+                    
+                    else{
+                       cad.append(c);                                                     
+                        }
+                    }
+                else
+                    cad.append(c);
+                   
+                if(ope(c)){
+                    
+                }
+                    
+               } 
+            if(ope(c)){
+                StringBuilder nume = new StringBuilder();
+                StringBuilder nume2 = new StringBuilder();
+                String num;
+                num= cad.toString();
+                double num1=0,num2=0,op=0;
+                int n1, j=0;
+                n1= num.length();
+                char x;
+                
+                while(j<n1){
+
+                    x= num.charAt(j);
+                    
+                    while(!ope(x)){
+                        nume.append(x);
+                        num1= Double.parseDouble(nume.toString());    
+                        
+                    }
+                    if(ope(x))                      
+                        if(x=='+'){
+                            j++;
+                            while(j<n1){
+                                nume2.append(x);
+                                num2= Double.parseDouble(nume2.toString());
+                            }
+                            
+                            op=num1+num2;
+                            res=res+op;
+                            
+                        }
+                        else 
+                            if(x=='-'){
+                                 j++;
+                            while(j<n1){
+                                nume2.append(x);
+                                num2= Double.parseDouble(nume2.toString());
+                            }
+                            
+                            op=num1-num2;
+                            res=res+op;
+                                
+                            }
+                            else 
+                                if(x=='*'){
+                                     j++;
+                            while(j<n1){
+                                nume2.append(x);
+                                num2= Double.parseDouble(nume2.toString());
+                            }
+                            
+                            op=num1*num2;
+                            res=res+op;
+                                    
+                                }
+                                else 
+                                    if(x=='/'){
+                                         j++;
+                            while(j<n1){
+                                nume2.append(x);
+                                num2= Double.parseDouble(nume2.toString());
+                            }
+                            
+                            op=num1+num2;
+                            res=res/op;
+                                        
+                                    }
+                    
+                    
+                   j++; 
+                }
+                
+                
+            }
+                
+            i++;       
+        }
+             
+      return res;  
+    }
+    */
+    
+    private String opera(char s, double d1, double d2){
+        String res = "";
+        DecimalFormat n = new DecimalFormat("0.000");
+        switch(s){
+            case '*':
+                res = n.format(d1 * d2);
+                break;
+            case '/':
+                res = n.format(d1 / d2);
+                break;
+            case '+':
+                res = n.format(d1 + d2);
+                break;
+            case '_':
+                res = n.format(d1 - d2);
+                break;
+        }
+        return res;
+    }
+    
+    public String aPostFijo(){
+        StringBuilder cad = new StringBuilder();
+        if (revisarParentesis()) {
+            
+            int n;
+            n = numero.length();
+            int i = 0;
+
+            Stack<Character> pila = new Stack();
+
+            while (i < n) {
+
+                char c, f = 'i';
+
+                c = numero.charAt(i);
+
+                if (parDer(c)) {
+                    
+                    pila.push(c);
+                    
+
+                }
+                if (numero(c)) {
+                   
+                    if((i+1)==n){
+                            cad.append(c);
+                    }
+                    else{
+                        f= numero.charAt(i + 1);
+                        if(!numero(f)){
+                            cad.append(c);
+                            cad.append(' ');
+                        }
+                        else
+                            cad.append(c);
+                    }               
+                }
+                if (parIzq(c)) {
+                   
+                    
+                    while(!pila.empty()&& pila.peek()!='(') {
+                        cad.append(pila.pop());
+                        cad.append(' ');
+                    }
+                    
+                    pila.pop(); 
+                }
+                if(ope(c)){
+                    
+                   
+                    
+                    while(!pila.empty()&& jerarquia(c)<=jerarquia(pila.peek())){
+                      
+                        cad.append(pila.pop());
+                        
+                       
+                                              
+                    }
+                    
+                    pila.push(c);
+                   
+                    
+                    
+                }
+                
+               i++; 
+            }
+            while(!pila.empty()&&!parDer(pila.peek())){
+                cad.append(pila.pop());
+                
+            }
+        }
+        
+        
+        return cad.toString();
+    }
+    
+    public String evaluaOperación(String postfija){
+        Stack <String> pila = new Stack();
+        int i;
+        char aux;
+        StringBuilder auxiliar = new StringBuilder();
+        double p, p1;
+        
+        for(i = 0; i<postfija.length(); i++){
+            aux = postfija.charAt(i);
+            if(numero(aux)){
+                auxiliar.append(aux);
+            }
+            else {
+                if(auxiliar.length() != 0){
+                    pila.push(auxiliar.toString());
+                    auxiliar = new StringBuilder();
+                }
+                if(ope(aux)){
+                    try {
+                        p = Double.parseDouble(pila.pop());
+                        p1 = Double.parseDouble(pila.pop());
+                        pila.push(opera(aux, p1, p));
+                    } catch (Exception e){
+                        pila.push("Error.");
+                    }
+                }
+            }
+        }
+        
+        return pila.pop();
+        
+    }
+    
+
+    public static void main(String[] args) {
+
+        Calculador c1;
+        String numero;
+
+        c1 = new Calculador("(2*5/2)*(9-8)");
+      
+        System.out.println(c1.aPostFijo());
+        numero=c1.aPostFijo();
+        System.out.println(c1.evaluaOperación(numero));
+        
+      
+
+    }
+
+}
